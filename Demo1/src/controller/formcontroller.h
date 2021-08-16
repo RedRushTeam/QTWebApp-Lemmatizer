@@ -10,6 +10,13 @@
 #include "httpresponse.h"
 #include "httprequesthandler.h"
 
+//lemmatizator include
+#include <lemmatizator_engine.h>
+
+//lemmatizer prop
+constexpr auto LEMADR = "C:\\RGD\\RussianGrammaticalDictionary\\bin-windows64\\lemmatizer.db";
+constexpr int FLAGS = LEME_DEFAULT;
+
 using namespace stefanfrings;
 
 /**
@@ -25,8 +32,14 @@ public:
     /** Constructor */
     FormController();
 
+    /** Preparing lematizer */
+    static void prepare_lemmatizer();
+
     /** Generates the response */
     void service(HttpRequest& request, HttpResponse& response);
+
+private:
+    static inline HLEM lemmas_engine;
 };
 
 #endif // FORMCONTROLLER_H

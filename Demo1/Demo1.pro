@@ -6,6 +6,7 @@ TEMPLATE = app
 QT = core network
 CONFIG += console
 QMAKE_CXXFLAGS += -std=c++17
+CONFIG += c++17
 HEADERS += \
            src/controller/logincontroller.h \
            src/global.h \

@@ -30,6 +30,13 @@ RequestMapper::~RequestMapper()
 
 void RequestMapper::service(HttpRequest& request, HttpResponse& response)
 {
+    static bool one_step_flag = true;
+
+    if(one_step_flag){
+        FormController::prepare_lemmatizer();
+        one_step_flag = !one_step_flag;
+    }
+
     QByteArray path=request.getPath();
     qDebug("RequestMapper: path=%s",path.data());
 

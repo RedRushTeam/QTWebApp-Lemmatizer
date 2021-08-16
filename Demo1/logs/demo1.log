@@ -640,3 +640,155 @@
 13.08.2021 17:37:03.739 0 DEBUG    0x00000a9c RequestMapper: created
 13.08.2021 17:37:03.783 0 DEBUG    0x00000a9c HttpListener: Listening on port 8080
 13.08.2021 17:37:03.783 1 WARNING  0x00000a9c Application has started
+16.08.2021 13:11:06.903 0 DEBUG    0x000040d0 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:11:06.904 0 DEBUG    0x000040d0 TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:11:06.906 0 DEBUG    0x000040d0 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:11:06.906 0 DEBUG    0x000040d0 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:11:06.906 0 DEBUG    0x000040d0 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:11:06.906 0 DEBUG    0x000040d0 RequestMapper: created
+16.08.2021 13:11:09.985 0 DEBUG    0x000040d0 HttpListener: Listening on port 8080
+16.08.2021 13:11:09.985 1 WARNING  0x000040d0 Application has started
+16.08.2021 13:12:12.098 0 DEBUG    0x00000824 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:12:12.098 0 DEBUG    0x00000824 TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:12:12.099 0 DEBUG    0x00000824 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:12:12.099 0 DEBUG    0x00000824 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:12:12.099 0 DEBUG    0x00000824 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:12:12.099 0 DEBUG    0x00000824 RequestMapper: created
+16.08.2021 13:12:15.343 0 DEBUG    0x00000824 HttpListener: Listening on port 8080
+16.08.2021 13:12:15.343 1 WARNING  0x00000824 Application has started
+16.08.2021 13:38:37.947 0 DEBUG    0x00000118 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:38:37.948 0 DEBUG    0x00000118 TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:38:37.948 0 DEBUG    0x00000118 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:38:37.948 0 DEBUG    0x00000118 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:38:37.948 0 DEBUG    0x00000118 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:38:37.948 0 DEBUG    0x00000118 RequestMapper: created
+16.08.2021 13:38:38.002 0 DEBUG    0x00000118 HttpListener: Listening on port 8080
+16.08.2021 13:38:38.002 1 WARNING  0x00000118 Application has started
+16.08.2021 13:40:08.757 0 DEBUG    0x00002e88 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:40:08.757 0 DEBUG    0x00002e88 TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:40:08.757 0 DEBUG    0x00002e88 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:40:08.758 0 DEBUG    0x00002e88 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:40:08.758 0 DEBUG    0x00002e88 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:40:08.758 0 DEBUG    0x00002e88 RequestMapper: created
+16.08.2021 13:40:11.734 0 DEBUG    0x00002e88 HttpListener: Listening on port 8080
+16.08.2021 13:40:11.734 1 WARNING  0x00002e88 Application has started
+16.08.2021 13:41:10.678 0 DEBUG    0x000042f8 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:41:10.678 0 DEBUG    0x000042f8 TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:41:10.678 0 DEBUG    0x000042f8 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:41:10.679 0 DEBUG    0x000042f8 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:41:10.679 0 DEBUG    0x000042f8 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:41:10.679 0 DEBUG    0x000042f8 RequestMapper: created
+16.08.2021 13:41:13.589 0 DEBUG    0x000042f8 HttpListener: Listening on port 8080
+16.08.2021 13:41:13.589 1 WARNING  0x000042f8 Application has started
+16.08.2021 13:42:06.001 0 DEBUG    0x00001fa0 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:42:06.001 0 DEBUG    0x00001fa0 TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:42:06.001 0 DEBUG    0x00001fa0 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:42:06.002 0 DEBUG    0x00001fa0 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:42:06.002 0 DEBUG    0x00001fa0 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:42:06.002 0 DEBUG    0x00001fa0 RequestMapper: created
+16.08.2021 13:42:08.819 0 DEBUG    0x00001fa0 HttpListener: Listening on port 8080
+16.08.2021 13:42:08.819 1 WARNING  0x00001fa0 Application has started
+16.08.2021 13:46:37.631 0 DEBUG    0x00000748 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:46:37.631 0 DEBUG    0x00000748 TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:46:37.631 0 DEBUG    0x00000748 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:46:37.632 0 DEBUG    0x00000748 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:46:37.632 0 DEBUG    0x00000748 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:46:37.632 0 DEBUG    0x00000748 RequestMapper: created
+16.08.2021 13:46:37.691 0 DEBUG    0x00000748 HttpListener: Listening on port 8080
+16.08.2021 13:46:37.691 1 WARNING  0x00000748 Application has started
+16.08.2021 13:48:26.618 0 DEBUG    0x00004134 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:48:26.618 0 DEBUG    0x00004134 TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:48:26.619 0 DEBUG    0x00004134 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:48:26.619 0 DEBUG    0x00004134 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:48:26.619 0 DEBUG    0x00004134 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:48:26.619 0 DEBUG    0x00004134 RequestMapper: created
+16.08.2021 13:48:26.674 0 DEBUG    0x00004134 HttpListener: Listening on port 8080
+16.08.2021 13:48:26.674 1 WARNING  0x00004134 Application has started
+16.08.2021 13:49:12.981 0 DEBUG    0x00004124 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:49:12.981 0 DEBUG    0x00004124 TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:49:12.982 0 DEBUG    0x00004124 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:49:12.982 0 DEBUG    0x00004124 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:49:12.982 0 DEBUG    0x00004124 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:49:12.982 0 DEBUG    0x00004124 RequestMapper: created
+16.08.2021 13:49:16.031 0 DEBUG    0x00004124 HttpListener: Listening on port 8080
+16.08.2021 13:49:16.031 1 WARNING  0x00004124 Application has started
+16.08.2021 13:51:46.668 0 DEBUG    0x0000302c TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:51:46.668 0 DEBUG    0x0000302c TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:51:46.668 0 DEBUG    0x0000302c HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:51:46.669 0 DEBUG    0x0000302c StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:51:46.669 0 DEBUG    0x0000302c StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:51:46.669 0 DEBUG    0x0000302c RequestMapper: created
+16.08.2021 13:51:49.636 0 DEBUG    0x0000302c HttpListener: Listening on port 8080
+16.08.2021 13:51:49.636 1 WARNING  0x0000302c Application has started
+16.08.2021 13:53:14.726 0 DEBUG    0x000041a4 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:53:14.726 0 DEBUG    0x000041a4 TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:53:14.726 0 DEBUG    0x000041a4 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:53:14.727 0 DEBUG    0x000041a4 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:53:14.727 0 DEBUG    0x000041a4 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:53:14.727 0 DEBUG    0x000041a4 RequestMapper: created
+16.08.2021 13:53:17.710 0 DEBUG    0x000041a4 HttpListener: Listening on port 8080
+16.08.2021 13:53:17.710 1 WARNING  0x000041a4 Application has started
+16.08.2021 13:55:22.343 0 DEBUG    0x00003458 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:55:22.343 0 DEBUG    0x00003458 TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:55:22.343 0 DEBUG    0x00003458 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:55:22.343 0 DEBUG    0x00003458 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:55:22.344 0 DEBUG    0x00003458 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:55:22.344 0 DEBUG    0x00003458 RequestMapper: created
+16.08.2021 13:55:25.508 0 DEBUG    0x00003458 HttpListener: Listening on port 8080
+16.08.2021 13:55:25.508 1 WARNING  0x00003458 Application has started
+16.08.2021 13:56:51.405 0 DEBUG    0x000045ec TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 13:56:51.405 0 DEBUG    0x000045ec TemplateCache: timeout=60000, size=1000000
+16.08.2021 13:56:51.405 0 DEBUG    0x000045ec HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 13:56:51.406 0 DEBUG    0x000045ec StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 13:56:51.406 0 DEBUG    0x000045ec StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 13:56:51.406 0 DEBUG    0x000045ec RequestMapper: created
+16.08.2021 13:56:51.457 0 DEBUG    0x000045ec HttpListener: Listening on port 8080
+16.08.2021 13:56:51.457 1 WARNING  0x000045ec Application has started
+16.08.2021 14:02:34.511 0 DEBUG    0x0000437c TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 14:02:34.511 0 DEBUG    0x0000437c TemplateCache: timeout=60000, size=1000000
+16.08.2021 14:02:34.512 0 DEBUG    0x0000437c HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 14:02:34.512 0 DEBUG    0x0000437c StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 14:02:34.512 0 DEBUG    0x0000437c StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 14:02:34.512 0 DEBUG    0x0000437c RequestMapper: created
+16.08.2021 14:02:34.564 0 DEBUG    0x0000437c HttpListener: Listening on port 8080
+16.08.2021 14:02:34.564 1 WARNING  0x0000437c Application has started
+16.08.2021 14:05:04.766 0 DEBUG    0x000029f8 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 14:05:04.766 0 DEBUG    0x000029f8 TemplateCache: timeout=60000, size=1000000
+16.08.2021 14:05:04.767 0 DEBUG    0x000029f8 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 14:05:04.767 0 DEBUG    0x000029f8 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 14:05:04.767 0 DEBUG    0x000029f8 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 14:05:04.767 0 DEBUG    0x000029f8 RequestMapper: created
+16.08.2021 14:05:04.815 0 DEBUG    0x000029f8 HttpListener: Listening on port 8080
+16.08.2021 14:05:04.815 1 WARNING  0x000029f8 Application has started
+16.08.2021 14:05:54.786 0 DEBUG    0x0000434c TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 14:05:54.786 0 DEBUG    0x0000434c TemplateCache: timeout=60000, size=1000000
+16.08.2021 14:05:54.787 0 DEBUG    0x0000434c HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 14:05:54.787 0 DEBUG    0x0000434c StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 14:05:54.787 0 DEBUG    0x0000434c StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 14:05:54.787 0 DEBUG    0x0000434c RequestMapper: created
+16.08.2021 14:05:57.645 0 DEBUG    0x0000434c HttpListener: Listening on port 8080
+16.08.2021 14:05:57.645 1 WARNING  0x0000434c Application has started
+16.08.2021 14:07:56.166 0 DEBUG    0x00004044 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 14:07:56.166 0 DEBUG    0x00004044 TemplateCache: timeout=60000, size=1000000
+16.08.2021 14:07:56.166 0 DEBUG    0x00004044 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 14:07:56.167 0 DEBUG    0x00004044 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 14:07:56.167 0 DEBUG    0x00004044 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 14:07:56.167 0 DEBUG    0x00004044 RequestMapper: created
+16.08.2021 14:07:59.374 0 DEBUG    0x00004044 HttpListener: Listening on port 8080
+16.08.2021 14:07:59.374 1 WARNING  0x00004044 Application has started
+16.08.2021 14:10:49.200 0 DEBUG    0x000044a4 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 14:10:49.200 0 DEBUG    0x000044a4 TemplateCache: timeout=60000, size=1000000
+16.08.2021 14:10:49.200 0 DEBUG    0x000044a4 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 14:10:49.200 0 DEBUG    0x000044a4 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 14:10:49.200 0 DEBUG    0x000044a4 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 14:10:49.201 0 DEBUG    0x000044a4 RequestMapper: created
+16.08.2021 14:10:52.233 0 DEBUG    0x000044a4 HttpListener: Listening on port 8080
+16.08.2021 14:10:52.233 1 WARNING  0x000044a4 Application has started
+16.08.2021 14:18:56.194 0 DEBUG    0x000032b4 TemplateLoader: path=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/templates, codec=UTF-8
+16.08.2021 14:18:56.194 0 DEBUG    0x000032b4 TemplateCache: timeout=60000, size=1000000
+16.08.2021 14:18:56.194 0 DEBUG    0x000032b4 HttpSessionStore: Sessions expire after 3600000 milliseconds
+16.08.2021 14:18:56.195 0 DEBUG    0x000032b4 StaticFileController: docroot=C:/Users/beerR2600/YandexDisk/QtWebApp/QTWebApp-Lemmatizer/Demo1/etc/docroot, encoding=UTF-8, maxAge=60000
+16.08.2021 14:18:56.195 0 DEBUG    0x000032b4 StaticFileController: cache timeout=60000, size=1000000
+16.08.2021 14:18:56.195 0 DEBUG    0x000032b4 RequestMapper: created
+16.08.2021 14:18:56.243 0 DEBUG    0x000032b4 HttpListener: Listening on port 8080
+16.08.2021 14:18:56.243 1 WARNING  0x000032b4 Application has started
