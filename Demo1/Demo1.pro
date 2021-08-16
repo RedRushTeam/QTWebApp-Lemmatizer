@@ -5,7 +5,7 @@ TARGET = Demo1
 TEMPLATE = app
 QT = core network
 CONFIG += console
-
+QMAKE_CXXFLAGS += -std=c++17
 HEADERS += \
            src/controller/logincontroller.h \
            src/global.h \
@@ -38,3 +38,15 @@ include(../QtWebApp/logging/logging.pri)
 include(../QtWebApp/httpserver/httpserver.pri)
 include(../QtWebApp/templateengine/templateengine.pri)
 
+
+LIBS += -L$$PWD/../../../../../../RGD/RussianGrammaticalDictionary/lib64/ -llemmatizator
+LIBS += -L$$PWD/../../../../../../RGD/RussianGrammaticalDictionary/lib64/ -lSolarix_Grammar_Engine
+
+#LIBS += "C:\RGD\RussianGrammaticalDictionary\lib64\lemmatizator.dll"
+#LIBS += "C:\RGD\RussianGrammaticalDictionary\lib64\solarix_grammar_engine.dll"
+
+INCLUDEPATH += $$PWD/../../../../../../RGD/RussianGrammaticalDictionary/include/lem/solarix/pro
+DEPENDPATH += $$PWD/../../../../../../RGD/RussianGrammaticalDictionary/include/lem/solarix/pro
+
+INCLUDEPATH += $$PWD/../../../../../../RGD/RussianGrammaticalDictionary/include/lem/solarix
+DEPENDPATH += $$PWD/../../../../../../RGD/RussianGrammaticalDictionary/include/lem/solarix

@@ -8,7 +8,9 @@
 #include "global.h"
 #include "httplistener.h"
 #include "requestmapper.h"
-
+//lemmatizator include
+#include <lemmatizator_engine.h>
+#include <iostream>
 using namespace stefanfrings;
 
 /** Search the configuration file */
@@ -45,13 +47,34 @@ QString searchConfigFile()
     qFatal("Cannot find config file %s",qPrintable(fileName));
     return nullptr;
 }
-
-
+constexpr auto LEMADR = "C:\\RGD\\RussianGrammaticalDictionary\\bin-windows64\\lemmatizer.db";
+constexpr int FLAGS = LEME_FASTEST;
 /**
   Entry point of the program.
 */
 int main(int argc, char *argv[])
 {
+    setlocale(LC_ALL, "Russian");
+
+    const char* dict_path = NULL;
+    const char* language = "russian";
+
+    if (dict_path == NULL)
+        dict_path = LEMADR;
+
+    int flags = FLAGS;
+
+    std::cout << std::endl << "Loading the lemmatizator from: " << dict_path;
+
+    auto lemmas_engine = sol_LoadLemmatizatorA(dict_path, flags);
+
+    /*if (lemmas_engine == NULL)
+    {
+        std::cout << "Could not load the lemmatizator from: " << dict_path << " With flag: " << flags;
+        system("pause");
+        exit(1);
+    }*/
+
     QCoreApplication app(argc,argv);
     app.setApplicationName("Demo1");
 

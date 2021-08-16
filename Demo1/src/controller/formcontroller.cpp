@@ -26,9 +26,9 @@ void FormController::service(HttpRequest& request, HttpResponse& response)
         response.write("<input type=\"hidden\" name=\"action\" value=\"show\">");
         response.write("<textarea name=\"name\" cols=\"100\" rows=\"10\" readonly=\"readonly\">" + QString(request.getParameter("name")).toUtf8() + "</textarea>");
 
-        /*response.write("<br>OUTPUT = ");
-        response.write(QString(request.getParameter("name")).toUtf8());
-        response.write("</body></html>",true);*/
+        response.write("<input type=\"submit\"> ");
+        response.write("</form>");
+        response.write("</body></html>",true);
     }
     else
     {
