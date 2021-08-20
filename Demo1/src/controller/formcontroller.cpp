@@ -6,7 +6,7 @@
 #include "formcontroller.h"
 #include <iostream>
 #include <QRegExp>
-#include <re2.h>
+
 FormController::FormController()
 {}
 
@@ -50,26 +50,11 @@ void FormController::service(HttpRequest& request, HttpResponse& response)
         response.write("<textarea style=\"height:200px; width:500px;\" name=\"input\" placeholder=\"Введите текст\" autofocus></textarea>");
 
         auto input_string = QString(QString(request.getParameter("input")).toUtf8());
-        auto input_string_as_std = QString(QString(request.getParameter("input")).toUtf8()).toStdString();
+        QRegExp reg_for_symbl("[^А-Яа-я ]+");
+        input_string.replace(reg_for_symbl, " ");
 
-        std::string wrapped_pattern_for_symbols = "[^А-Яа-я ]+";
-        RE2::Options opt_for_symbols;
-        opt_for_symbols.set_log_errors(false);
-        opt_for_symbols.set_case_sensitive(false);
-        opt_for_symbols.set_encoding(re2::RE2::Options::Encoding::EncodingLatin1);
-        RE2 re2_for_symbols(wrapped_pattern_for_symbols, opt_for_symbols);
-
-        std::string wrapped_pattern_for_spaces = "( {2,})+";
-        RE2::Options opt_for_spaces;
-        opt_for_spaces.set_log_errors(false);
-        opt_for_spaces.set_case_sensitive(false);
-        opt_for_spaces.set_encoding(re2::RE2::Options::Encoding::EncodingLatin1);
-        RE2 re2_for_spaces(wrapped_pattern_for_spaces, opt_for_spaces);
-
-        RE2::GlobalReplace(&input_string_as_std, re2_for_symbols, " ");
-        RE2::GlobalReplace(&input_string_as_std, re2_for_spaces, " ");
-
-        input_string = QString::fromStdString(input_string_as_std);
+        QRegExp reg_for_letters("( {2,})+");
+        input_string.replace(reg_for_letters, " ");
 
         auto only_words = input_string.split(" ");
 
@@ -109,26 +94,12 @@ void FormController::service(HttpRequest& request, HttpResponse& response)
         response.write("<textarea style=\"height:200px; width:500px;\" name=\"input\" placeholder=\"Введите текст\" autofocus></textarea>");
 
         auto input_string = QString(QString(request.getParameter("input")).toUtf8());
-        auto input_string_as_std = QString(QString(request.getParameter("input")).toUtf8()).toStdString();
+        QRegExp reg_for_symbl("[^А-Яа-я ]+");
+        input_string.replace(reg_for_symbl, " ");
 
-        std::string wrapped_pattern_for_symbols = "[^А-Яа-я ]+";
-        RE2::Options opt_for_symbols;
-        opt_for_symbols.set_log_errors(false);
-        opt_for_symbols.set_case_sensitive(false);
-        opt_for_symbols.set_encoding(re2::RE2::Options::Encoding::EncodingLatin1);
-        RE2 re2_for_symbols(wrapped_pattern_for_symbols, opt_for_symbols);
+        QRegExp reg_for_letters("( {2,})+");
+        input_string.replace(reg_for_letters, " ");
 
-        std::string wrapped_pattern_for_spaces = "( {2,})+";
-        RE2::Options opt_for_spaces;
-        opt_for_spaces.set_log_errors(false);
-        opt_for_spaces.set_case_sensitive(false);
-        opt_for_spaces.set_encoding(re2::RE2::Options::Encoding::EncodingLatin1);
-        RE2 re2_for_spaces(wrapped_pattern_for_spaces, opt_for_spaces);
-
-        RE2::GlobalReplace(&input_string_as_std, re2_for_symbols, " ");
-        RE2::GlobalReplace(&input_string_as_std, re2_for_spaces, " ");
-
-        input_string = QString::fromStdString(input_string_as_std);
         auto only_words = input_string.split(" ");
 
         for(auto& obj : only_words){
@@ -176,3 +147,4 @@ void FormController::service(HttpRequest& request, HttpResponse& response)
             //style="position: absolute; left: -9999px; width: 1px; height: 1px;"
         }
 }
+
