@@ -51,3 +51,8 @@ DEPENDPATH += $$PWD/../../../../../../RGD/RussianGrammaticalDictionary/include/l
 
 INCLUDEPATH += $$PWD/../../../../../../RGD/RussianGrammaticalDictionary/include/lem/solarix
 DEPENDPATH += $$PWD/../../../../../../RGD/RussianGrammaticalDictionary/include/lem/solarix
+
+win32: LIBS += -L$$PWD/../../../../../../re2/Qlib/ -lre2
+
+INCLUDEPATH += $$PWD/../../../../../../re2/include
+DEPENDPATH += $$PWD/../../../../../../re2/include

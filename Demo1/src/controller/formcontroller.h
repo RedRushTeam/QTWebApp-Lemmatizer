@@ -15,7 +15,7 @@
 
 //lemmatizer prop
 constexpr auto LEMADR = "C:\\RGD\\RussianGrammaticalDictionary\\bin-windows64\\lemmatizer.db";
-constexpr int FLAGS = LEME_DEFAULT;
+constexpr int FLAGS = LEME_FASTEST;
 
 using namespace stefanfrings;
 
