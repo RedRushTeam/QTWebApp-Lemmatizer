@@ -41,11 +41,13 @@ void FormController::service(HttpRequest& request, HttpResponse& response)
     {
 
         response.write("<html><body>");
-        response.write("<title>Лемматизация</title><center>");
+        response.write("<title>Лемматизация</title>");
         response.write("<form method=\"post\">");
-        response.write("  <input type=\"hidden\" name=\"action\" value=\"second_show\">");
+        response.write("<input type=\"hidden\" name=\"action\" value=\"second_show\">");
 
-        response.write("<textarea name=\"input\" cols=\"100\" rows=\"10\" placeholder=\"input text\" autofocus></textarea>");
+        response.write("<center><h1>ОНЛАЙН-ЛЕММАТИЗАЦИЯ<h1><center><center><p><font size=\"1\"> <font><p><center><center>");
+
+        response.write("<textarea style=\"height:200px; width:500px;\" name=\"input\" placeholder=\"Введите текст\" autofocus></textarea>");
 
         auto input_string = QString(QString(request.getParameter("input")).toUtf8());
         QRegExp reg_for_symbl("[^А-Яа-я ]+");
@@ -63,7 +65,7 @@ void FormController::service(HttpRequest& request, HttpResponse& response)
             sol_GetLemma8(FormController::lemmas_engine, obj.toStdString().c_str(), utf8, sizeof(utf8));
             obj = QString(utf8);
         }
-        QByteArray data_for_write = "<textarea name=\"output\" cols=\"100\" rows=\"10\" readonly=\"readonly\">";
+        QByteArray data_for_write = "<textarea name=\"output\" style=\"height:200px; width:500px;\" readonly=\"readonly\">";
 
         for(int i = 0; i < only_words.size(); ++i)
             data_for_write.append(QString(only_words[i] + " "));
@@ -72,63 +74,77 @@ void FormController::service(HttpRequest& request, HttpResponse& response)
 
         response.write(data_for_write);
 
-        response.write("<input type=\"submit\" name=\"one more\" value=\"Отправить\"> ");
+        response.write("<center><p><font size=\"1\"> <font><p><center><input type=\"submit\" name=\"one more\" value=\"Отправить\" style=\"height:100px; width:200px; font-size:20px\">");
+        response.write("<center><p><font size=\"3\" color=\"black\" face=\"Arial\">Сервис онлайн-лемматизации текстов позволяет получить начальные формы всех встреченных слов. <wbr>Все символы, не являющиеся кириллическими, будут удалены.<font><p><center>");
+        response.write("<center><p><font size=\"5\" color=\"red\" face=\"Arial\">место для рекламы :)<font><p><center>");
+        response.write("<center><p><font size=\"2\" color=\"gray\" face=\"Arial\">онлайн лемматизация онлайн-лемматизация начальная форма слово русский язык терм словоформа текст текстовый анализ лса алгоритм лемма лемматизатор<font><p><center>");
         response.write("</form>");
-        response.write("</body></html>",true);
+        response.write("</body></html>",true);;
     }
 
     else if (request.getParameter("action")=="second_show")
         {
-            response.write("<html><body>");
-            response.write("<title>Лемматизация</title><center>");
-            response.write("<form method=\"post\">");
-            response.write("  <input type=\"hidden\" name=\"action\" value=\"show\">");
+        response.write("<html><body>");
+        response.write("<title>Лемматизация</title>");
+        response.write("<form method=\"post\">");
+        response.write("<input type=\"hidden\" name=\"action\" value=\"show\">");
 
-            response.write("<textarea name=\"input\" cols=\"100\" rows=\"10\" placeholder=\"input text\" autofocus></textarea>");
+        response.write("<center><h1>ОНЛАЙН-ЛЕММАТИЗАЦИЯ<h1><center><center><p><font size=\"1\"> <font><p><center><center>");
 
-            auto input_string = QString(QString(request.getParameter("input")).toUtf8());
-            QRegExp reg_for_symbl("[^А-Яа-я ]+");
-            input_string.replace(reg_for_symbl, " ");
+        response.write("<textarea style=\"height:200px; width:500px;\" name=\"input\" placeholder=\"Введите текст\" autofocus></textarea>");
 
-            QRegExp reg_for_letters("( {2,})+");
-            input_string.replace(reg_for_letters, " ");
+        auto input_string = QString(QString(request.getParameter("input")).toUtf8());
+        QRegExp reg_for_symbl("[^А-Яа-я ]+");
+        input_string.replace(reg_for_symbl, " ");
 
-            auto only_words = input_string.split(" ");
+        QRegExp reg_for_letters("( {2,})+");
+        input_string.replace(reg_for_letters, " ");
 
+        auto only_words = input_string.split(" ");
 
+        for(auto& obj : only_words){
+            char utf8[128];
+            auto tmp = sol_GetLemma8(FormController::lemmas_engine, obj.toStdString().c_str(), utf8, sizeof(utf8));
+            obj = QString(utf8);
+        }
+        QByteArray data_for_write = "<textarea name=\"output\" style=\"height:200px; width:500px;\" readonly=\"readonly\">";
 
-            for(auto& obj : only_words){
-                char utf8[128];
-                auto tmp = sol_GetLemma8(FormController::lemmas_engine, obj.toStdString().c_str(), utf8, sizeof(utf8));
-                obj = QString(utf8);
-            }
-            QByteArray data_for_write = "<textarea name=\"output\" cols=\"100\" rows=\"10\" readonly=\"readonly\">";
+        for(int i = 0; i < only_words.size(); ++i)
+            data_for_write.append(QString(only_words[i] + " "));
 
-            for(int i = 0; i < only_words.size(); ++i)
-                data_for_write.append(QString(only_words[i] + " "));
+        data_for_write.append("</textarea><center>");
 
-            data_for_write.append("</textarea><center>");
+        response.write(data_for_write);
 
-            response.write(data_for_write);
-
-            response.write("<input type=\"submit\" name=\"one more\" value=\"Отправить\"> ");
-            response.write("</form>");
-            response.write("</body></html>",true);
+        response.write("<center><p><font size=\"1\"> <font><p><center><input type=\"submit\" name=\"one more\" value=\"Отправить\" style=\"height:100px; width:200px; font-size:20px\">");
+        response.write("<center><p><font size=\"3\" color=\"black\" face=\"Arial\">Сервис онлайн-лемматизации текстов позволяет получить начальные формы всех встреченных слов. <wbr>Все символы, не являющиеся кириллическими, будут удалены.<font><p><center>");
+        response.write("<center><p><font size=\"5\" color=\"red\" face=\"Arial\">место для рекламы :)<font><p><center>");
+        response.write("<center><p><font size=\"2\" color=\"gray\" face=\"Arial\">онлайн лемматизация онлайн-лемматизация начальная форма слово русский язык терм словоформа текст текстовый анализ лса алгоритм лемма лемматизатор<font><p><center>");
+        response.write("</form>");
+        response.write("</body></html>",true);
     }
 
     else
         {
             response.write("<html><body>");
-            response.write("<title>Лемматизация</title><center>");
+
+            response.write("<title>Лемматизация</title>");
             response.write("<form method=\"post\">");
             response.write("<input type=\"hidden\" name=\"action\" value=\"show\">");
 
-            response.write("<textarea name=\"input\" cols=\"100\" rows=\"10\" placeholder=\"input text\" autofocus></textarea>");
-            response.write("<textarea name=\"output\" padding=\"100\" cols=\"100\" rows=\"10\" disabled=\"disabled\" placeholder=\"output text\"></textarea><center>");
+            response.write("<center><h1>ОНЛАЙН-ЛЕММАТИЗАЦИЯ<h1><center><center><p><font size=\"1\"> <font><p><center><center>");
 
-            response.write("<input type=\"submit\" name=\"one more\" value=\"Отправить\"> ");
+            response.write("<textarea style=\"height:200px; width:500px;\" name=\"input\" placeholder=\"Введите текст\" autofocus></textarea>");
+            response.write("<textarea name=\"output\" style=\"height:200px; width:500px;\" disabled=\"disabled\" placeholder=\"Здесь появится лемматизированный текст\" text-align=\"center\";></textarea><center>");
+
+            response.write("<center><p><font size=\"1\"> <font><p><center><input type=\"submit\" name=\"one more\" value=\"Отправить\" style=\"height:100px; width:200px; font-size:20px\">");
+            response.write("<center><p><font size=\"3\" color=\"black\" face=\"Arial\">Сервис онлайн-лемматизации текстов позволяет получить начальные формы всех встреченных слов. <wbr>Все символы, не являющиеся кириллическими, будут удалены.<font><p><center>");
+            response.write("<center><p><font size=\"5\" color=\"red\" face=\"Arial\">место для рекламы :)<font><p><center>");
+            response.write("<center><p><font size=\"2\" color=\"gray\" face=\"Arial\">онлайн лемматизация онлайн-лемматизация начальная форма слово русский язык терм словоформа текст текстовый анализ лса алгоритм лемма лемматизатор<font><p><center>");
             response.write("</form>");
             response.write("</body></html>",true);
+
+            //style="position: absolute; left: -9999px; width: 1px; height: 1px;"
         }
 }
 
