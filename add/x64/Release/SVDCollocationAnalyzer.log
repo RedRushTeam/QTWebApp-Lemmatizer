@@ -1,0 +1,22 @@
+﻿  analyzer.cpp
+  container_class_interface.cpp
+  list_of_functions.cpp
+  main.cpp
+  math_core.cpp
+  parser.cpp
+  piecewise_container_class.cpp
+  sparce_container_class.cpp
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(408,150): warning C4838: Преобразование из "int" в "short" требует сужающего преобразования.
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(418,155): warning C4838: Преобразование из "int" в "short" требует сужающего преобразования.
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(476,150): warning C4838: Преобразование из "int" в "short" требует сужающего преобразования.
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(492,155): warning C4838: Преобразование из "int" в "short" требует сужающего преобразования.
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(516,57): warning C4838: Преобразование из "double" в "int" требует сужающего преобразования.
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(516,62): warning C4838: Преобразование из "double" в "short" требует сужающего преобразования.
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(608,36): warning C4302: приведение типов: усечение из "const char *" к "char"
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(611,36): warning C4302: приведение типов: усечение из "const char *" к "char"
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(711,39): warning C4302: приведение типов: усечение из "const char *" к "char"
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(714,39): warning C4302: приведение типов: усечение из "const char *" к "char"
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(804,36): warning C4302: приведение типов: усечение из "const char *" к "char"
+D:\QTWebApp-Lemmatizer\add\analyzer.cpp(807,36): warning C4302: приведение типов: усечение из "const char *" к "char"
+  LINK : указан параметр /LTCG, но не требуется создание кода; удалите /LTCG из командной строки компоновки для повышения производительности компоновщика
+  SVDCollocationAnalyzer.vcxproj -> D:\QTWebApp-Lemmatizer\add\x64\Release\SVDCollocationAnalyzer.exe

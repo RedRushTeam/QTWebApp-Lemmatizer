@@ -1,0 +1,988 @@
+﻿#include "analyzer.h"
+
+mutex mut;
+
+void analyzer::create_lemmatizer()
+{
+	#pragma omp critical (lemmatizer_download)
+	{
+		const char* dict_path = NULL;
+		const char* language = "russian";
+		if (dict_path == NULL)
+			dict_path = global_var::LEMADR.c_str();
+
+		int flags = global_var::FLAGS;
+
+		//cout << endl << "Loading the lemmatizator from: " << dict_path;
+
+		analyzer::lemmas_engine = sol_LoadLemmatizatorA(dict_path, flags);
+
+		if (analyzer::lemmas_engine == NULL)
+		{
+			cout << "Could not load the lemmatizator from: " << dict_path;
+			system("pause");
+			exit(1);
+		}
+	}
+}
+
+void analyzer::calculate_counter_of_tokenizer()
+{
+	this->lemmatize_all_words();
+
+		//критическая секция
+	#pragma omp critical (maps_into_analyzer)
+	{
+		for (auto& obj : *this->list_of_all_lemmatized_text) {	//обращение к критическому ресурсу
+			if (obj == string("А"))
+				continue;
+
+			analyzer::map_of_tokens_WORD_TOKEN.insert(make_pair(obj, analyzer::map_of_tokens_WORD_TOKEN.size()));
+		}
+	}
+
+	#pragma omp critical (maps_into_analyzer)
+	{
+		analyzer::counter_of_tokenizer = analyzer::map_of_tokens_WORD_TOKEN.size();
+	}
+}
+
+void analyzer::calculate_counter_of_tokenizer_without_rare_words()	//вызвано
+{
+	this->lemmatize_all_words();
+
+	#pragma omp critical (maps_into_analyzer)
+	{
+		unordered_set<int> set_of_words_in_this_text;
+
+		for (auto obj : *this->list_of_all_lemmatized_text) {
+
+			if (obj == string("А"))
+				continue;
+
+			word_and_number_of_appearances_structure _key{ obj, 1, 1 };
+
+			auto iter = analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key);
+
+			if (iter == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end()) {
+				set_of_words_in_this_text.insert(analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.size());
+				analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.insert(make_pair(_key, analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.size()));
+			}
+			else {
+				int tmp_token = iter->second;
+				word_and_number_of_appearances_structure __key;
+				if (set_of_words_in_this_text.find(tmp_token) == set_of_words_in_this_text.end()) {
+					__key = { obj, iter->first.number_of_appearances_of_this_word + 1, iter->first.number_of_texts_in_which_term_occurs + 1 };
+					set_of_words_in_this_text.insert(tmp_token);
+				}
+				else
+					__key = { obj, iter->first.number_of_appearances_of_this_word + 1, iter->first.number_of_texts_in_which_term_occurs };
+
+				analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.erase(__key);
+				analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.insert(make_pair(__key, tmp_token));
+			}
+		}
+	}
+
+	#pragma omp critical (maps_into_analyzer)
+	{
+		this->counter_of_tokenizer_without_rare_words = analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.size();
+	}
+}
+
+void analyzer::initialize_matrix_for_SVD()
+{
+	analyzer::all_matrix_for_SVD = make_shared<MatrixXf>(analyzer::counter_of_tokenizer_without_rare_words_and_text, analyzer::number_of_texts);
+	analyzer::all_matrix_for_SVD->fill(0);
+
+	int new_index = 0;
+	for (auto it = analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.begin(); it != analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end(); ++it) {
+		it.value() = new_index;
+
+		++new_index;
+	}
+
+	for (auto& obj : analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_)
+		analyzer::map_of_tokens_TOKEN_Word_and_number_of_appearances_struct_.insert(make_pair(obj.second, obj.first));
+}
+
+void analyzer::calculate_counter_of_tokenizer_SVD_words()
+{
+	this->lemmatize_all_words();
+
+	shared_ptr<list<int>> list_of_all_tokens_of_text = make_shared<list<int>>();
+
+	for (auto& obj : *this->list_of_all_lemmatized_text) {
+		word_and_number_of_appearances_structure _key{ obj, 1, 1 };
+		#pragma omp critical (maps_into_analyzer)
+		{
+			auto iter = analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key);
+			if (iter != analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+				list_of_all_tokens_of_text->push_back(iter->second);
+		}
+	}
+
+	#pragma omp critical (couter_of_texts)
+	{
+		static int couter_of_texts = 0;
+		for (auto& obj : *list_of_all_tokens_of_text)
+			if(analyzer::map_of_tokens_TOKEN_Word_and_number_of_appearances_struct_.find(obj) != analyzer::map_of_tokens_TOKEN_Word_and_number_of_appearances_struct_.end())
+				(*analyzer::all_matrix_for_SVD)(obj, couter_of_texts) = (*analyzer::all_matrix_for_SVD)(obj, couter_of_texts) + 1;
+
+		++couter_of_texts;
+	}
+}
+
+int analyzer::get_counter_of_tokenizer_without_rare_words_SVD()
+{
+	shared_ptr<BDCSVD<MatrixXf>> BDCSVD_svd = make_shared<BDCSVD<MatrixXf>>(*(analyzer::all_matrix_for_SVD), ComputeThinV | ComputeThinU);
+	auto singular_values_like_vectorXf = BDCSVD_svd->singularValues();
+	auto V_matrix_of_SVD = BDCSVD_svd->matrixV();
+	auto U_matrix_of_SVD = BDCSVD_svd->matrixU();
+
+	shared_ptr<MatrixXf> svalues_as_MatrixXf = make_shared<MatrixXf>();
+	svalues_as_MatrixXf->resize(singular_values_like_vectorXf.size(), singular_values_like_vectorXf.size());
+	svalues_as_MatrixXf->fill(0.);
+
+	//распараллелрить тут?
+	for (int i = 0; i < singular_values_like_vectorXf.size(); ++i)
+		(*svalues_as_MatrixXf)(i, i) = singular_values_like_vectorXf[i];
+
+	svalues_as_MatrixXf->conservativeResize(global_var::COLLOC_DIST + 1, global_var::COLLOC_DIST + 1);
+
+	shared_ptr<MatrixXf> resized_V_matrix_of_SVD = make_shared<MatrixXf>();
+	resized_V_matrix_of_SVD->resize(global_var::COLLOC_DIST, V_matrix_of_SVD.cols());
+
+	shared_ptr<MatrixXf> resized_U_matrix_of_SVD = make_shared<MatrixXf>();
+	resized_U_matrix_of_SVD->resize(U_matrix_of_SVD.rows(), global_var::COLLOC_DIST);
+
+	//распараллелрить тут?
+	for (int i = 0; i <= global_var::COLLOC_DIST; ++i)
+		for (int j = 0; j < V_matrix_of_SVD.cols(); ++j)
+			resized_V_matrix_of_SVD->operator()(i, j) = V_matrix_of_SVD(i, j);
+
+	for (int i = 0; i < U_matrix_of_SVD.rows(); ++i)
+		for (int j = 0; j <= global_var::COLLOC_DIST; ++j)
+			resized_U_matrix_of_SVD->operator()(i, j) = U_matrix_of_SVD(i, j);
+
+	//auto restored_matrix = ((*resized_U_matrix_of_SVD) * (*svalues_as_MatrixXf)) * (*resized_V_matrix_of_SVD);
+
+	vector<float> lenghts_words_vector;
+	lenghts_words_vector.resize(U_matrix_of_SVD.rows(), NULL);
+
+	//распараллелрить тут?
+	for (auto i = 0; i < U_matrix_of_SVD.rows(); ++i) {
+		for (auto j = 0; j < U_matrix_of_SVD.cols(); ++j) {
+			lenghts_words_vector[i] += U_matrix_of_SVD(i, j) * U_matrix_of_SVD(i, j);
+		}
+		lenghts_words_vector[i] = sqrt(lenghts_words_vector[i]);
+	}
+
+	vector<float> lenghts_texts_vector;
+	lenghts_texts_vector.resize(V_matrix_of_SVD.rows(), NULL); //Mabe need a cols, not rows
+
+
+	for (auto i = 0; i < V_matrix_of_SVD.rows(); ++i) {
+		for (auto j = 0; j < V_matrix_of_SVD.cols(); ++j) {
+			lenghts_texts_vector[i] += V_matrix_of_SVD(i, j) * V_matrix_of_SVD(i, j);
+		}
+		lenghts_texts_vector[i] = sqrt(lenghts_texts_vector[i]);
+	}
+
+	unordered_map<pair<int, int>, float> scalar_proizv; //терм, документ, скалярное произведение
+
+	//Я считаю что этот цикл можно и нужно оптимизировать. Возможно, есть возможность уйти от медленного unordered_map
+	for (auto k = 0; k < V_matrix_of_SVD.rows(); ++k)
+		for (auto i = 0; i < U_matrix_of_SVD.rows(); ++i)
+			for (auto j = 0; j < U_matrix_of_SVD.cols(); ++j) {
+				auto iter = scalar_proizv.find(make_pair(i, k));
+				if(iter == scalar_proizv.end())
+					scalar_proizv.insert(make_pair(make_pair(i, k), U_matrix_of_SVD(i, j) * V_matrix_of_SVD(k, j)));
+				else 
+					scalar_proizv[make_pair(i, k)] = iter->second + U_matrix_of_SVD(i, j) * V_matrix_of_SVD(k, j);
+			}
+
+	map<pair<int, int>, float> cosinuses; //терм, документ, скалярное произведение
+
+	for (int i = 0; i < lenghts_words_vector.size(); ++i)
+		for (int j = 0; j < lenghts_texts_vector.size(); ++j) {
+			auto iter = cosinuses.find(make_pair(i, j));
+			if (iter == cosinuses.end())
+				cosinuses.insert(make_pair(make_pair(i, j), (lenghts_words_vector[i] / lenghts_texts_vector[j])));
+			else
+				cosinuses[make_pair(i, j)] = iter->second / lenghts_words_vector[i] / lenghts_texts_vector[j];
+		}
+
+	list<pair<int, int>> list_of_terms_will_be_deleted;
+
+	for (auto& obj : cosinuses)
+		if (obj.second < global_var::DELETE_THRESHOLD && (cosinuses.find(obj.first) != cosinuses.end()))
+				list_of_terms_will_be_deleted.push_back(obj.first);
+
+	for (auto& obj : list_of_terms_will_be_deleted)
+		cosinuses.erase(obj);
+
+	string prev_word = "";
+
+	for (auto& obj : cosinuses)
+		if (analyzer::map_of_tokens_TOKEN_Word_and_number_of_appearances_struct_.find(obj.first.first) != analyzer::map_of_tokens_TOKEN_Word_and_number_of_appearances_struct_.end() && !(prev_word == (analyzer::map_of_tokens_TOKEN_Word_and_number_of_appearances_struct_.find(obj.first.first))->second.word)) {
+			prev_word = (analyzer::map_of_tokens_TOKEN_Word_and_number_of_appearances_struct_.find(obj.first.first))->second.word;
+			analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_SVD.insert(make_pair(analyzer::map_of_tokens_TOKEN_Word_and_number_of_appearances_struct_.find(obj.first.first)->second, obj.first.first));
+		}
+
+	analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.clear();
+	analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.insert(analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_SVD.begin(), analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_SVD.end());
+	analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_SVD.clear();
+
+	int tokens_new = 0;
+	string zero_token;
+	for (auto it = analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.begin(); it != analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end(); ++it) {
+		if (!tokens_new)
+			zero_token = it.key().word;
+
+		it.value() = tokens_new;
+		++tokens_new;
+	}
+
+	//стоп слово А всегда имеет нулевой номер
+	word_and_number_of_appearances_structure _key = { zero_token, 1, 1 };
+	word_and_number_of_appearances_structure __key = { (string)"А", 1, 1 };
+	analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key).value() = analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key).value();
+	analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key).value() = 0;
+
+	analyzer::counter_of_tokenizer_without_rare_words_SVD = analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.size();
+
+	return analyzer::counter_of_tokenizer_without_rare_words_SVD;
+}
+
+void analyzer::calculate_mat_ozidanie()
+{
+	this->lemmatize_all_words();
+
+	for (auto it = this->list_of_all_lemmatized_text->begin(); it != this->list_of_all_lemmatized_text->end(); ++it) {
+		//#pragma omp critical (maps_into_analyzer)
+		//{
+			mut.lock();
+			for (int i = -global_var::COLLOC_DIST - 1; i <= global_var::COLLOC_DIST + 1; ++i)
+				if (i != 0) {
+					auto now_it = this->move_list_iterator(it, i);
+					if (now_it == this->list_of_all_lemmatized_text->end())
+						continue;
+
+					if (*it == string("А"))
+						continue;
+
+					if (*now_it == string("А"))
+						continue;
+
+					word_and_number_of_appearances_structure _key = { *it, 1, 1 };
+					word_and_number_of_appearances_structure __key = { *now_it, 1, 1 };
+
+					if (analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key) == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+						continue;
+
+					if (analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key) == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+						continue;
+
+					int first_index = analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key).value();	//обращение к критическому ресурсу		//быть может, тут не нужна потокобезопасность?
+
+					if (first_index < dynamic_pointer_cast<piecewise_container_class>(this->_mat_ozidanie)->get_downloaded_range().first ||
+						(first_index > dynamic_pointer_cast<piecewise_container_class>(this->_mat_ozidanie)->get_downloaded_range().second))
+						continue;
+
+					if (i > 0)
+						this->_mat_ozidanie->summ_for_concret_colloc(first_index, analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key)->second, i - 1, (now_type)1.);	//обращение к критическому ресурсу
+					else
+						this->_mat_ozidanie->summ_for_concret_colloc(first_index, analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key)->second, abs(i) - 1, (now_type)1.);	//обращение к критическому ресурсу				
+				}
+			mut.unlock();
+		//}
+	}
+}
+
+shared_ptr<container_class_interface> analyzer::calculate_mat_disperse()
+{
+	this->lemmatize_all_words();
+
+	auto now_text_container = make_shared<piecewise_container_class>(global_var::COLLOC_DIST, this->_mat_ozidanie->get_count_of_collocations(), dynamic_pointer_cast<piecewise_container_class>(this->_mat_ozidanie)->get_downloaded_range());
+
+	for (auto it = this->list_of_all_lemmatized_text->begin(); it != this->list_of_all_lemmatized_text->end(); ++it) {
+		//#pragma omp critical (maps_into_analyzer)
+		//{
+		mut.lock();
+			for (int i = -global_var::COLLOC_DIST - 1; i <= global_var::COLLOC_DIST + 1; ++i)
+				if (i != 0) {
+					auto now_it = this->move_list_iterator(it, i);
+					if (now_it == this->list_of_all_lemmatized_text->end())
+						continue;
+
+					if (*it == string("А"))
+						continue;
+
+					if (*now_it == string("А"))
+						continue;
+
+					word_and_number_of_appearances_structure _key = { *it, 1, 1 };
+					word_and_number_of_appearances_structure __key = { *now_it, 1, 1 };
+
+					if (analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key) == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+						continue;
+
+					if (analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key) == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+						continue;
+
+					int first_index = (*this->map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key)).second;	//обращение к критическому ресурсу		//быть может, тут не нужна потокобезопасность?
+
+					if (first_index < dynamic_pointer_cast<piecewise_container_class>(now_text_container)->get_downloaded_range().first ||
+						(first_index > dynamic_pointer_cast<piecewise_container_class>(now_text_container)->get_downloaded_range().second))
+						continue;
+
+					if (analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key) == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+						continue;
+
+					if (i > 0)
+						now_text_container->summ_for_concret_colloc(first_index, analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key)->second, i - 1, (now_type)1.);	//обращение к критическому ресурсу
+					else
+						now_text_container->summ_for_concret_colloc(first_index, analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key)->second, abs(i) - 1, (now_type)1.);	//обращение к критическому ресурсу				
+				}
+		//}
+		mut.unlock();
+	}
+
+	//#pragma omp critical (ozidanie)
+	//{
+	//	*now_text_container -= analyzer::_mat_ozidanie;
+	//}
+
+	return now_text_container;
+}
+
+shared_ptr<MatrixXf> analyzer::calculate_SVD_matrix_for_concret_text()
+{
+	auto matrix_for_all_SVD = make_shared<MatrixXf>(analyzer::helper_map_for_SVD_rows_colloc_numbers->size(), 1);
+
+	matrix_for_all_SVD->fill(NULL);
+
+	this->lemmatize_all_words();
+
+	tsl::robin_map<three_coordinate_structure, int> map_of_tokens_TOKEN_DATA;
+
+	for (auto it = this->list_of_all_lemmatized_text->begin(); it != this->list_of_all_lemmatized_text->end(); ++it) {
+		#pragma omp critical (maps_into_analyzer)
+		{
+			for (int i = -global_var::COLLOC_DIST - 1; i <= global_var::COLLOC_DIST + 1; ++i)
+				if (i != 0) {
+					auto now_it = this->move_list_iterator(it, i);
+					if (now_it == this->list_of_all_lemmatized_text->end())
+						continue;
+
+					if (*it == string("А"))
+						continue;
+
+					if (*now_it == string("А"))
+						continue;
+
+					word_and_number_of_appearances_structure _key = { *it, 1, 1 };
+					word_and_number_of_appearances_structure __key = { *now_it, 1, 1 };
+
+					if (analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key) == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+						continue;
+
+					if (analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key) == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+						continue;
+
+					int first_index = (*this->map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key)).second;	//обращение к критическому ресурсу		//быть может, тут не нужна потокобезопасность?
+
+					if (first_index < dynamic_pointer_cast<piecewise_container_class>(this->_mat_ozidanie)->get_downloaded_range().first ||
+						(first_index > dynamic_pointer_cast<piecewise_container_class>(this->_mat_ozidanie)->get_downloaded_range().second))
+						continue;
+
+					if (analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key) == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+						continue;
+
+					
+
+					if (i > 0) {
+						if (!analyzer::inverse_helper_map_for_SVD_rows_colloc_numbers->contains(three_coordinate_structure{first_index, analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key)->second, (short)(i - 1)}))
+							continue;	//проверка на то, что пара с подозрением на флуктуацию
+						three_coordinate_structure ___key = { first_index, analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key)->second, i - 1 };
+						auto iter_ = map_of_tokens_TOKEN_DATA.find(___key);
+						if (iter_ == map_of_tokens_TOKEN_DATA.end())
+							map_of_tokens_TOKEN_DATA[___key] = (float)1.;
+						else
+							iter_.value() = iter_.value() + 1;
+					}
+					else {
+						if (!analyzer::inverse_helper_map_for_SVD_rows_colloc_numbers->contains(three_coordinate_structure{ first_index, analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key)->second, (short)(abs(i) - 1) }))
+							continue;	//проверка на то, что пара с подозрением на флуктуацию
+						three_coordinate_structure ___key = { first_index, analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key)->second, abs(i) - 1 };
+						auto iter_ = map_of_tokens_TOKEN_DATA.find(___key);
+						if (iter_ == map_of_tokens_TOKEN_DATA.end())
+							map_of_tokens_TOKEN_DATA[___key] = (float)1.;
+						else
+							iter_.value() = iter_.value() + 1;
+					}
+				}
+		}
+	}
+
+	auto size = inverse_helper_map_for_SVD_rows_colloc_numbers->size();
+	
+	for (auto obj : map_of_tokens_TOKEN_DATA) {
+		auto iter = inverse_helper_map_for_SVD_rows_colloc_numbers->find(obj.first);
+
+		if (iter == inverse_helper_map_for_SVD_rows_colloc_numbers->end())
+			continue;
+
+		auto shit = iter.value();
+
+		(*matrix_for_all_SVD)(iter.value(), 0) += (now_type)obj.second;
+	}
+
+	map_of_tokens_TOKEN_DATA.clear();
+
+	return matrix_for_all_SVD;
+}
+
+void analyzer::calculate_idf_tf_matrix(int number_of_text)
+{
+	this->lemmatize_all_words();
+
+	//#pragma omp critical (maps_into_analyzer)
+	//{
+		mut.lock();
+		for (auto it = this->list_of_all_lemmatized_text->begin(); it != this->list_of_all_lemmatized_text->end(); ++it) {
+			for (int i = -global_var::COLLOC_DIST - 1; i <= global_var::COLLOC_DIST + 1; ++i)
+				if (i != 0) {
+					auto now_it = this->move_list_iterator(it, i);
+					if (now_it == this->list_of_all_lemmatized_text->end())
+						continue;
+
+					if (*it == string("А"))
+						continue;
+
+					if (*now_it == string("А"))
+						continue;
+
+					word_and_number_of_appearances_structure _key = { *it, 1, 1 };
+					word_and_number_of_appearances_structure __key = { *now_it, 1, 1 };
+
+					int first_index = (*this->map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key)).second;	//обращение к критическому ресурсу		//быть может, тут не нужна потокобезопасность?
+
+					if (analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key) == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+						continue;
+
+					if (i > 0) {
+						three_coordinate_structure ___key = { first_index, analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key)->second, i - 1 };
+
+						auto x2 = this->_mat_ozidanie->get_count_of_concret_collocation(___key.first_coord, ___key.second_coord, ___key.k);
+						
+						___key.k = -1;
+
+						auto iter = analyzer::inverse_helper_map_for_SVD_rows_colloc_numbers->find(___key);
+
+						if (iter == analyzer::inverse_helper_map_for_SVD_rows_colloc_numbers->end())
+							continue;
+
+						(*tf_matrix)[iter.value()][number_of_text] += x2;
+
+						(*idf_matrix)[iter.value()] = (*idf_matrix)[iter.value()] + x2/*нормированное мат ожидание*/ - (*idf_matrix)[iter.value()] * x2/*нормированное мат ожидание*/;
+					}
+					else {
+						three_coordinate_structure ___key = { first_index, analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(__key)->second, abs(i) - 1 };
+
+						auto x2 = this->_mat_ozidanie->get_count_of_concret_collocation(___key.first_coord, ___key.second_coord, ___key.k);
+
+						___key.k = -1;
+
+						auto iter = analyzer::inverse_helper_map_for_SVD_rows_colloc_numbers->find(___key);
+
+						if (iter == analyzer::inverse_helper_map_for_SVD_rows_colloc_numbers->end())
+							continue;
+
+						(*tf_matrix)[iter.value()][number_of_text] += x2;
+
+						(*idf_matrix)[iter.value()] = (*idf_matrix)[iter.value()] + x2/*нормированное мат ожидание*/ - (*idf_matrix)[iter.value()] * x2/*нормированное мат ожидание*/;
+					}
+				}
+			
+			word_and_number_of_appearances_structure key_ = { *it, 1, 1 };
+
+			if (analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(key_) == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+				continue;
+
+			int first_index = (*this->map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(key_)).second;
+
+			three_coordinate_structure ____key = { first_index, -1., -1. };
+
+			auto _iter = analyzer::inverse_helper_map_for_SVD_rows_colloc_numbers->find(____key);
+
+			if (_iter == analyzer::inverse_helper_map_for_SVD_rows_colloc_numbers->end())
+				continue;
+
+			(*tf_matrix)[_iter.value()][number_of_text] += 1.f;
+
+			if ((*idf_matrix)[_iter.value()] == 0)
+				(*idf_matrix)[_iter.value()] = 1.;
+		}
+	//}
+	mut.unlock();
+	for (size_t i = 0; i < tf_matrix->size(); ++i)
+		(*tf_matrix)[i][number_of_text] /= this->list_of_all_lemmatized_text->size();	//возможно стоит делить на colloc dist + 1
+}
+
+void analyzer::calculate_tf_matrix_for_only_terms(int number_of_text)
+{
+	this->lemmatize_all_words();
+
+	//#pragma omp critical (maps_into_analyzer)
+	//{
+	mut.lock();
+		for (auto it = this->list_of_all_lemmatized_text->begin(); it != this->list_of_all_lemmatized_text->end(); ++it) {
+
+			if (*it == string("А"))
+				continue;
+
+			word_and_number_of_appearances_structure _key = { *it, 1, 1 };
+
+			auto iter = analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key);
+
+			if (iter == analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end())
+				continue;
+
+			(*tf_matrix)[iter.value()][number_of_text] += 1.0f;
+		}
+	mut.unlock();
+	//}
+
+	for (size_t i = 0; i < tf_matrix->size(); ++i)
+		(*tf_matrix)[i][number_of_text] /= this->list_of_all_lemmatized_text->size();
+}
+
+void analyzer::grab_dict(string path)
+{
+	ifstream _input(path);
+
+	//std::stringstream ss;
+	std::string untext;
+	std::streamoff len = list_of_functions::stream_size(_input);
+	if (len == -1)
+		cout << "it doesn't work dic";
+	untext.resize(static_cast<std::string::size_type>(len));
+	_input.rdbuf()->sgetn(&untext[0], len);
+
+	untext = list_of_functions::UTF8ToANSI(untext);
+	list<string> terms;
+
+	boost::algorithm::split(terms, untext, boost::is_any_of("\n"));
+
+	terms.pop_back();
+
+	for (auto obj : terms) {
+		vector<string> vec;
+		boost::algorithm::split(vec, obj, boost::is_any_of(" "));
+		//cout << vec[0];
+		analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.insert(make_pair(word_and_number_of_appearances_structure{ vec[0], -1, -1 }, stoi(vec[1])));
+	}
+
+	//cout << endl << endl << map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.size();
+}
+
+void analyzer::vost_map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_()
+{
+	for (auto obj : analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_)
+		analyzer::map_of_tokens_TOKEN_Word_and_number_of_appearances_struct_.insert(make_pair(obj.second, obj.first));
+}
+
+shared_ptr<unordered_set<int>> analyzer::parse_and_lematize_one_text(string _path)
+{
+	shared_ptr<unordered_set<string>> _set = make_shared<unordered_set<string>>();
+
+	parser _parser(_path);	//tut peredaetsa kopiya
+	auto result_of_parse = _parser.parse();
+
+	char utf8[128];
+
+	for (auto& obj : *result_of_parse) {
+		while (obj.find("ё") != string::npos)
+			obj[obj.find("ё")] = (char)"е";
+
+		while (obj.find("Ё") != string::npos)
+			obj[obj.find("Ё")] = (char)"е";
+
+		sol_GetLemmaA(analyzer::lemmas_engine, obj.c_str(), utf8, sizeof(utf8));
+		_set->insert((string)(utf8));
+	}
+
+	list<string> list_for_erase;
+
+	for (auto& obj : *_set) {
+		bool is_vowel_finded = false;
+
+		for (auto obj1 : obj)
+			if (analyzer::set_of_vowels.find(obj1) != analyzer::set_of_vowels.end())
+				is_vowel_finded = true;
+
+		if (!is_vowel_finded)
+			list_for_erase.push_back(obj);
+	}
+
+	for (auto obj : list_for_erase)
+		_set->erase(obj);
+
+	shared_ptr<unordered_set<int>> _set_int = make_shared<unordered_set<int>>();
+
+	for (auto obj : *_set)
+		_set_int->insert(map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(word_and_number_of_appearances_structure{ obj, -1, -1 }).value());
+
+	return _set_int;
+}
+
+void analyzer::out_of_predl(shared_ptr<unordered_set<int>> set_for_unique_terms, string _path)
+{
+	list<pair<list<int>, string>> strange_shit;
+
+	//ifstream _input(_path);
+
+	//std::stringstream ss;
+	std::string untext;
+	/*std::streamoff len = list_of_functions::stream_size(_input);
+	if (len == -1)
+		cout << "it doesn't work out";
+	untext.resize(static_cast<std::string::size_type>(len));
+	_input.rdbuf()->sgetn(&untext[0], len);
+
+	untext = list_of_functions::UTF8ToANSI(untext);*/
+	untext = _path;
+	list<string> predl;
+
+	std::string aaa =  "[!?]+";
+	RE2::Options opt_for_dots;
+	opt_for_dots.set_log_errors(false);
+	opt_for_dots.set_case_sensitive(false);
+	opt_for_dots.set_encoding(re2::RE2::Options::Encoding::EncodingLatin1);
+	RE2 re2_for_dots(aaa, opt_for_dots);
+	RE2::GlobalReplace(&untext, re2_for_dots, ".");
+
+	boost::algorithm::split(predl, untext, boost::is_any_of( "."));
+
+	predl.pop_back();
+
+	for (auto obj : predl) {
+		//cout << obj;
+		string not_moved_obj(obj);
+
+		if (obj == "")
+			continue;
+
+		std::string wrapped_pattern_for_symbols =  "[^А-Яа-я ]+";
+		RE2::Options opt_for_symbols;
+		opt_for_symbols.set_log_errors(false);
+		opt_for_symbols.set_case_sensitive(false);
+		opt_for_symbols.set_encoding(re2::RE2::Options::Encoding::EncodingLatin1);
+		RE2 re2_for_symbols(wrapped_pattern_for_symbols, opt_for_symbols);
+
+		std::string wrapped_pattern_for_spaces =  "( {2,})+";
+		RE2::Options opt_for_spaces;
+		opt_for_spaces.set_log_errors(false);
+		opt_for_spaces.set_case_sensitive(false);
+		opt_for_spaces.set_encoding(re2::RE2::Options::Encoding::EncodingLatin1);
+		RE2 re2_for_spaces(wrapped_pattern_for_spaces, opt_for_spaces);
+
+		RE2::GlobalReplace(&obj, re2_for_symbols,  " ");
+		RE2::GlobalReplace(&obj, re2_for_spaces,  " ");
+
+		transform(obj.begin(), obj.end(), obj.begin(), ::tolower);
+		//cout << endl << obj;
+		if (obj[0] == ' ')
+			obj.erase(0, 1);
+		obj.pop_back();
+		if (obj[obj.size() - 1] != ' ')
+			obj.push_back(' ');
+
+		list<string> terms;
+		list<int> tokens;
+		boost::algorithm::split(terms, obj, boost::is_any_of( " "));
+	
+		char utf8[128];
+
+		for (auto& obj1 : terms) {
+			while (obj1.find("ё") != string::npos)
+				obj1[obj1.find("ё")] = (char)"е";
+
+			while (obj1.find("Ё") != string::npos)
+				obj1[obj1.find("Ё")] = (char)"е";
+
+			sol_GetLemmaA(analyzer::lemmas_engine, obj1.c_str(), utf8, sizeof(utf8));
+			obj1 = (string)(utf8);
+			//tokens.push_back(analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(word_and_number_of_appearances_structure{ (string)(utf8), -1, -1 }).value());
+		}
+
+		for (auto& obj2 : terms) {
+			bool is_vowel_finded = false;
+
+			for (auto obj3 : obj2)
+				if (analyzer::set_of_vowels.find(obj3) != analyzer::set_of_vowels.end())
+					is_vowel_finded = true;
+
+			if (!is_vowel_finded)
+				obj2 =  "А";
+		}
+
+		for (auto obj10 : terms)
+			tokens.push_back(analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(word_and_number_of_appearances_structure{ obj10, -1, -1 }).value());
+
+		strange_shit.push_back(make_pair(list<int>(), not_moved_obj));
+
+		for (auto obj11 : tokens)
+			strange_shit.back().first.push_back(obj11);
+	}
+	//std::ofstream _out_text(global_var::SUPER_PATH + "\\vivod.txt");
+
+	for(auto obj : strange_shit)
+		for (auto obj1 : obj.first)
+			if (set_for_unique_terms->find(obj1) != set_for_unique_terms->end()) {
+				//_out_text << /*list_of_functions::ANSIToUTF8*/obj.second << ". ";
+				abbreviated_text += obj.second;
+				//cout << obj.second << ". ";
+				break;
+			}
+
+	//_out_text.close();
+}
+
+list<string>::iterator analyzer::move_list_iterator(list<string>::iterator _it, int mover)
+{
+	if (!mover)
+		return this->list_of_all_lemmatized_text->end();
+
+	if (mover < 0) {
+		for (int i = mover; i != 0; ++i) {
+			if (_it == this->list_of_all_lemmatized_text->begin())
+				return this->list_of_all_lemmatized_text->end();
+			--_it;
+		}
+	} 
+	else {
+		for (int i = mover; i != 0; --i) {
+			if (_it == this->list_of_all_lemmatized_text->end())
+				return this->list_of_all_lemmatized_text->end();
+			++_it;
+		}
+	}
+
+	return _it;
+}
+
+string analyzer::get_word_for_token(int token)
+{
+	return analyzer::map_of_tokens_TOKEN_Word_and_number_of_appearances_struct_.find(token).value().word;
+}
+
+void analyzer::calculate_matrix_only_for_terms(int number_of_text)
+{
+	this->lemmatize_all_words();
+
+	for (auto it = this->list_of_all_lemmatized_text->begin(); it != this->list_of_all_lemmatized_text->end(); ++it) {
+		#pragma omp critical (maps_into_analyzer)
+		{
+			word_and_number_of_appearances_structure _key = { *it, 1, 1 };
+
+			analyzer::only_terms_mass[(*this->map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.find(_key)).second * analyzer::number_of_texts + number_of_text] += (now_type)1.;	//обращение к критическому ресурсу
+		}
+	}
+}
+
+void analyzer::lemmatize_all_words()
+{
+	this->list_of_all_lemmatized_text = make_shared<list<string>>();
+
+	char utf8[128];
+
+	for (auto& obj : *this->list_of_all_parsed_text) {
+		while (obj.find("ё") != string::npos )
+			obj[obj.find("ё")] = (char)"е";
+
+		while (obj.find("Ё") != string::npos)
+			obj[obj.find("Ё")] = (char)"е";
+
+		sol_GetLemmaA(analyzer::lemmas_engine, obj.c_str(), utf8, sizeof(utf8));
+		this->list_of_all_lemmatized_text->push_back((string)(utf8));
+	}
+
+	for (auto& obj : *this->list_of_all_lemmatized_text) {
+		bool is_vowel_finded = false;
+
+		for (auto obj1 : obj)
+			if (analyzer::set_of_vowels.find(obj1) != analyzer::set_of_vowels.end())
+				is_vowel_finded = true;
+
+		if(!is_vowel_finded)
+			obj = "А";
+	}
+
+	/*for (auto& obj : *this->list_of_all_lemmatized_text)	//TODO доп безопасность?
+		if (parser::stop_words.find(obj) != parser::stop_words.end())
+			obj = "А";*/
+}
+
+int analyzer::get_k()
+{
+	return analyzer::k;
+}
+
+int analyzer::get_number_of_texts()
+{
+	return analyzer::number_of_texts;
+}
+
+int analyzer::get_counter_of_tokenizer()
+{
+	return analyzer::counter_of_tokenizer;
+}
+
+int analyzer::get_counter_of_tokenizer_without_rare_words_with_cutoff(int cutoff)	//вызвано
+{
+	int counter_without_rare_words = 0;
+
+	list<word_and_number_of_appearances_structure> list_of_indexes_for_delete;
+
+	for (auto& obj : analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_)
+		if (obj.first.number_of_appearances_of_this_word > cutoff)
+			++counter_without_rare_words;
+		else
+			list_of_indexes_for_delete.push_back(obj.first);
+
+	for (auto obj : list_of_indexes_for_delete) 
+		analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.erase(obj);
+		
+	int tokens_new = 0;
+	for (auto it = analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.begin(); it != analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end(); ++it) {
+		it.value() = tokens_new;
+		++tokens_new;
+	}
+
+	word_and_number_of_appearances_structure __key = { string("А"), 1, 1 };
+
+	analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.erase(__key);	//test
+
+	analyzer::counter_of_tokenizer_without_rare_words = map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.size();
+	return map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.size();
+}
+
+int analyzer::get_counter_of_tokenizer_without_rare_words_with_cutoff_of_text(int cutoff, int cutoff_of_texts)	//вызвано
+{
+	int counter_without_rare_words = 0;
+
+	list<word_and_number_of_appearances_structure> list_of_indexes_for_delete;
+
+	for (auto& obj : analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_)
+		if (obj.first.number_of_appearances_of_this_word > cutoff || (obj.first.number_of_texts_in_which_term_occurs > cutoff_of_texts))
+			++counter_without_rare_words;
+		else
+			list_of_indexes_for_delete.push_back(obj.first);
+		
+	for (auto obj : list_of_indexes_for_delete) 
+		analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.erase(obj);
+
+	word_and_number_of_appearances_structure __key = { string("А"), 1, 1 };
+
+	analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.erase(__key);	//test
+
+	int tokens_new = 0;
+	for (auto it = analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.begin(); it != analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.end(); ++it) {
+		it.value() = tokens_new;
+		++tokens_new;
+	}
+
+	for (auto obj : analyzer::map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_)
+		analyzer::map_of_tokens_TOKEN_Word_and_number_of_appearances_struct_.insert(make_pair(obj.second, obj.first));
+
+	analyzer::counter_of_tokenizer_without_rare_words_and_text = map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.size();
+	return map_of_tokens_Word_and_number_of_appearances_struct_TOKEN_.size();
+}
+
+void analyzer::set_list_of_all_parsed_text(shared_ptr<list<string>> list_of_all_parsed_text)
+{
+	this->list_of_all_parsed_text = list_of_all_parsed_text;
+}
+
+void analyzer::set_k(short _k)
+{
+	analyzer::k = k;
+}
+
+void analyzer::set_number_of_texts(int number_of_texts)
+{
+	analyzer::number_of_texts = number_of_texts;
+}
+
+void analyzer::set_helper_map_for_SVD_rows_colloc_numbers(shared_ptr<tsl::robin_map<size_t, three_coordinate_structure>> helper_map_for_SVD_rows_colloc_numbers)
+{
+	analyzer::inverse_helper_map_for_SVD_rows_colloc_numbers = make_shared<tsl::robin_map<three_coordinate_structure, size_t>>();
+
+	for (auto obj : *helper_map_for_SVD_rows_colloc_numbers)
+		analyzer::inverse_helper_map_for_SVD_rows_colloc_numbers->insert(make_pair(obj.second, obj.first));
+
+	analyzer::helper_map_for_SVD_rows_colloc_numbers = helper_map_for_SVD_rows_colloc_numbers;
+}
+
+shared_ptr<container_class_interface> analyzer::get_container_mat_ozidanie()
+{
+	return analyzer::_mat_ozidanie;
+}
+
+void analyzer::set_container_mat_ozidanie(shared_ptr<container_class_interface> _mat_ozidanie)
+{
+	analyzer::_mat_ozidanie = _mat_ozidanie;
+}
+
+shared_ptr<container_class_interface> analyzer::get_container_mat_disperse()
+{
+	return analyzer::_mat_disperse;
+}
+
+void analyzer::set_container_mat_disperse(shared_ptr<container_class_interface> _mat_disperse)
+{
+	analyzer::_mat_disperse = _mat_disperse;
+}
+
+shared_ptr<tsl::robin_set<three_coordinate_structure>> analyzer::get_colloc_and_terms_after_SVD()
+{
+	return colloc_and_terms_after_SVD;
+}
+
+void analyzer::set_colloc_and_terms_after_SVD(shared_ptr<tsl::robin_set<three_coordinate_structure>> colloc_and_terms_after_SVD)
+{
+	analyzer::colloc_and_terms_after_SVD = colloc_and_terms_after_SVD;
+}
+
+shared_ptr<vector<now_type>> analyzer::get_idf_matrix()
+{
+	return analyzer::idf_matrix;
+}
+
+void analyzer::set_idf_matrix(shared_ptr<vector<now_type>> idf_matrix)
+{
+	analyzer::idf_matrix = idf_matrix;
+}
+
+shared_ptr<vector<vector<now_type>>> analyzer::get_tf_matrix()
+{
+	return analyzer::tf_matrix;
+}
+
+void analyzer::set_tf_matrix(shared_ptr<vector<vector<now_type>>> tf_matrix)
+{
+	analyzer::tf_matrix = tf_matrix;
+}
+
+float* analyzer::get_only_terms_mass()
+{
+	return analyzer::only_terms_mass;
+}
+
+void analyzer::set_only_terms_mass(float* only_terms_mass)
+{
+	analyzer::only_terms_mass = only_terms_mass;
+}

@@ -1,0 +1,16 @@
+﻿  analyzer.cpp
+  container_class_interface.cpp
+  list_of_functions.cpp
+  main.cpp
+  math_core.cpp
+  parser.cpp
+  piecewise_container_class.cpp
+  sparce_container_class.cpp
+D:\QTWebApp-Lemmatizer\add\list_of_types.h(55,10): fatal error C1083: Не удается открыть файл включение: boost/regex.hpp: No such file or directory, (компилируется исходный файл main.cpp)
+D:\QTWebApp-Lemmatizer\add\list_of_types.h(55,10): fatal error C1083: Не удается открыть файл включение: boost/regex.hpp: No such file or directory, (компилируется исходный файл math_core.cpp)
+D:\QTWebApp-Lemmatizer\add\list_of_types.h(55,10): fatal error C1083: Не удается открыть файл включение: boost/regex.hpp: No such file or directory, (компилируется исходный файл list_of_functions.cpp)
+D:\QTWebApp-Lemmatizer\add\list_of_types.h(55,10): fatal error C1083: Не удается открыть файл включение: boost/regex.hpp: No such file or directory, (компилируется исходный файл parser.cpp)
+D:\QTWebApp-Lemmatizer\add\list_of_types.h(55,10): fatal error C1083: Не удается открыть файл включение: boost/regex.hpp: No such file or directory, (компилируется исходный файл piecewise_container_class.cpp)
+D:\QTWebApp-Lemmatizer\add\list_of_types.h(55,10): fatal error C1083: Не удается открыть файл включение: boost/regex.hpp: No such file or directory, (компилируется исходный файл sparce_container_class.cpp)
+D:\QTWebApp-Lemmatizer\add\list_of_types.h(55,10): fatal error C1083: Не удается открыть файл включение: boost/regex.hpp: No such file or directory, (компилируется исходный файл container_class_interface.cpp)
+D:\QTWebApp-Lemmatizer\add\list_of_types.h(55,10): fatal error C1083: Не удается открыть файл включение: boost/regex.hpp: No such file or directory, (компилируется исходный файл analyzer.cpp)
